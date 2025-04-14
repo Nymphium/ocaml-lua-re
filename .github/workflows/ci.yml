@@ -21,12 +21,10 @@ jobs:
         uses: rrbutani/use-nix-shell-action@v1
         with:
           devShell: .#ci
-      - run: |
-          # shellcheck disable=SC2046,SC2035
-          nix fmt $(git ls-files **/*.nix)
-          git diff --exit-code
-      - run: |
+      - name: Check for format
+        run: |
           # shellcheck disable=SC2046
+          nix fmt $(git ls-files '*.nix')
           dune fmt
           git diff --exit-code
       - name: Run tests

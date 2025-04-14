@@ -1,0 +1,37 @@
+(library
+ (name stub)
+ (public_name lua-re.stub)
+ (libraries ctypes ctypes.foreign)
+ (wrapped false)
+ (modules :standard \ discover)
+ (virtual_deps conf-lua)
+ (foreign_stubs
+  (language c)
+  (names helper_stub)
+  (flags
+   (:include c_flags.sexp)))
+ (flags
+  (:standard -w -9-27))
+ (ctypes
+  (external_library_name lua)
+  (build_flags_resolver pkg_config)
+  (headers
+   (preamble %{read:header.h}))
+  (type_description
+   (instance Types)
+   (functor Type_description))
+  (function_description
+   (instance Functions)
+   (functor Function_description))
+  (generated_types Types_generated)
+  (generated_entry_point C)))
+
+(rule
+ (targets c_flags.sexp)
+ (action
+  (run ./discover.exe)))
+
+(executable
+ (name discover)
+ (modules discover)
+ (libraries dune-configurator))

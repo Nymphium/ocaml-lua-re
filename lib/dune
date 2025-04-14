@@ -1,0 +1,12 @@
+(library
+ (name lib)
+ (public_name lua-re)
+ (modules :standard \ test)
+ (libraries lua-re.stub)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(test
+ (name test)
+ (modules test)
+ (libraries lib ctypes alcotest))

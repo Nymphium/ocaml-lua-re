@@ -13,13 +13,17 @@ jobs:
         with:
           extra-conf: |
             cores = 0
+      - uses: cachix/cachix-action@v16
+        with:
+          name: ocaml-lua-re-cache
+          authToken: '${{ secrets.CACHIX_TOKEN }}'
       - name: "Switch nix-shell to .#ci"
         uses: rrbutani/use-nix-shell-action@v1
         with:
           devShell: .#ci
       - run: |
-          # shellcheck disable=SC2046
-          nix fmt $(git ls-files ./**/*.nix)
+          # shellcheck disable=SC2046,SC2035
+          nix fmt $(git ls-files **/*.nix)
           git diff --exit-code
       - run: |
           # shellcheck disable=SC2046

@@ -1,0 +1,30 @@
+name: CI on Nix
+
+on:
+  [pull_request, push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/flake-checker-action@main
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            cores = 0
+      - name: "Switch nix-shell to .#ci"
+        uses: rrbutani/use-nix-shell-action@v1
+        with:
+          devShell: .#ci
+      - run: |
+          # shellcheck disable=SC2046
+          nix fmt $(git ls-files ./**/*.nix)
+          git diff --exit-code
+      - run: |
+          # shellcheck disable=SC2046
+          dune fmt
+          git diff --exit-code
+      - name: Run tests
+        run: |
+          dune test

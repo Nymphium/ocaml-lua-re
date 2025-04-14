@@ -120,7 +120,10 @@
           };
           default = pkgs.mkShell {
             inputsFrom = [ ci ];
-            buildInputs = devPackages ++ [ pkgs.nil ];
+            buildInputs = devPackages ++ [
+              pkgs.nil
+              pkgs.actionlint
+            ];
           };
         };
 

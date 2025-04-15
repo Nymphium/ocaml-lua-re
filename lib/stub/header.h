@@ -3,4 +3,6 @@
 
 #pragma GCC diagnostic ignored "-Wsizeof-pointer-div"
 
+#pragma GCC diagnostic ignored "-Wconstant-conversion"    
+
 #include "helper_stub.h"

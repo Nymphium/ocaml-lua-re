@@ -14,8 +14,6 @@ depends: [
   "conf-lua"
   "ppx_deriving"
 
-  "conf-clangd" { with-build }
-
   "alcotest" { with-test }
   "mdx" { with-test }
 

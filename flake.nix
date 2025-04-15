@@ -111,7 +111,7 @@
         formatter = pkgs.nixfmt-rfc-style;
 
         devShells = rec {
-          ci = pkgs.mkShellNoCC {
+          ci = pkgs.mkShell {
             inputsFrom = builtins.map (p: scope.${p}) localPackages;
             packages = [
               formatter
@@ -119,7 +119,7 @@
               pkgs.actionlint
             ];
           };
-          default = pkgs.mkShellNoCC {
+          default = pkgs.mkShell {
             inputsFrom = [ ci ];
             buildInputs = devPackages ++ [
               pkgs.nil

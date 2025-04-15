@@ -86,9 +86,14 @@ module Types : sig
 
   (** [Buffer.t] represents {{:https://www.lua.org/source/5.2/lauxlib.h.html#luaL_Buffer} [luaL_Buffer]}. *)
   module Buffer : sig
-    type t
+    type t = [ `luaL_Buffer ] structure
 
     val t : t typ
+    val b : (string, t) field
+    val size : (Unsigned.size_t, t) field
+    val n : (Unsigned.size_t, t) field
+    val l : (State.t, t) field
+    val initb : (string, t) field
   end
 
   (** [Alloc.t] is a wrapper for {{:https://www.lua.org/manual/5.2/manual.html#lua_Alloc} [lua_Alloc]}. *)

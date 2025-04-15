@@ -72,9 +72,19 @@ module Types (S : Ctypes.TYPE) = struct
   end
 
   module Buffer = struct
-    type t = unit ptr
+    type t = [ `luaL_Buffer ] structure
 
-    let t : t typ = typedef' "luaL_Buffer" @@ ptr void
+    let t : t typ = structure "luaL_Buffer"
+    let b = t.@:["b"] <- string
+    let size = t.@:["size"] <- size_t
+    let n = t.@:["n"] <- size_t
+    let l = t.@:["L"] <- State.t
+
+    (** TODO: char[LUAL_BUFFERSIZE] *)
+    let initb = t.@:["initb"] <- string
+
+    let () = seal t
+    let t = typedef' "luaL_Buffer" @@ t
   end
 
   module Alloc = struct

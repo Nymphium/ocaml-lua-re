@@ -5,7 +5,7 @@ open struct
   module C = Ctypes
 end
 
-(** Creates a new buffer. *)
+(** Creates a {{!LuaStub.Types.Buffer.type-t} [lua_Buffer]}. *)
 let create ?size state =
   let b = C.allocate T.Buffer.t @@ C.make T.Buffer.t in
   let () =
@@ -16,7 +16,7 @@ let create ?size state =
   b
 ;;
 
-(** Finalises and returns a buffer *)
+(** Finalises a buffer [b] and returns the value as an OCaml string *)
 let tostring state b =
   F.pushresult b;
   F.tostring state (-1)

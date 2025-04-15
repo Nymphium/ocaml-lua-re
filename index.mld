@@ -4,13 +4,19 @@
 
 {e lua-re} provides Lua bindings for OCaml using {{:https://github.com/yallop/ocaml-ctypes} ctypes}.
 
-{1 Modules}
+{[
+Lua.run
+@@ fun state ->
+Lua.CAPI.dostring state {|print("Hello, from", _VERSION)|}
+]}
 
-{2 {{!LuaStub} [LuaStub]}}
-{{!LuaStub} [LuaStub]} module offers simple Lua C API bindings for OCaml.
+{1 Packages}
 
-{2 {{!Lua}[Lua]}}
-{{!Lua}[Lua]} module provides a Lua API with an OCaml wrapper.
+{2 {{!LuaStub} [lua-re.stub]}}
+[lua-re.stub] provides {{!LuaStub} [LuaStub]} module, which is simple Lua C API bindings for OCaml.
+
+{2 {{!Lua} [lua-re]}}
+[lua-re] provides {{!Lua} [Lua]} module, which is a Lua API with an OCaml wrapper.
 
 {0}
 
@@ -24,5 +30,4 @@ $ dune build
 ]}
 
 {1 LICENSE}
-This package is licensed under the MIT License.
-
+This library is licensed under the MIT License.

@@ -11,7 +11,7 @@ module Types : sig
     val version_num : int
   end
 
-  (** {1 Ctypes types and values} *)
+  (**/**)
 
   type nonrec 'a typ = 'a typ
   type nonrec 'a ptr = 'a ptr
@@ -29,7 +29,7 @@ module Types : sig
   val size_t : Unsigned.size_t typ
   val char : char typ
 
-  (** {1 Bindings} *)
+  (**/**)
 
   (** [State.t] represents {{:https://www.lua.org/manual/5.2/manual.html#lua_State} [lua_State]}. *)
   module State : sig

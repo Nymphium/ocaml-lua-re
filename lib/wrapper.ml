@@ -5,7 +5,7 @@ open struct
   module T = Types
 end
 
-(** Creates lua_State with {{!LuaStub.Functions.open_libs} [luaL_openlibs]}.
+(** Creates {{!LuaStub.Types.State.type-t} [lua_State]} with {{!LuaStub.Functions.open_libs} [luaL_openlibs]}.
     See also: {!run} *)
 let create () =
   let state = F.newstate' () in
@@ -13,7 +13,7 @@ let create () =
   state
 ;;
 
-(** Creates lua_State by {!create} and automatically closes the state.
+(** Creates {{!LuaStub.Types.State.type-t} [lua_State]} by {!create} and automatically closes the state.
     {[
       run @@ fun state -> ignore @@ dostring state {|print("Hello, from", _VERSION)|}
     ]} *)
@@ -26,7 +26,7 @@ let run f =
       ret)
 ;;
 
-(** Gets the global variable from the {{!LuaStub.Types.State.type-t} [lua_State]} and check the type with [checker].
+(** Gets the global variable [name] from the [state] and check the type with [checker].
     {[
       run
       @@ fun state ->
@@ -39,7 +39,19 @@ let get_global state name checker =
   checker state (-1)
 ;;
 
-(** Sets panic handler. *)
+(** Sets panic handler.
+    {[
+      run
+      @@ fun state ->
+      let () =
+        ignore
+        @@ setpanic state
+        @@ fun state' ->
+        print_endline "Panic!";
+        ignore @@ pushstring state' "Panic!"
+      in
+      ignore @@ call state 0 0 0 (* panic here *)
+    ]} *)
 let setpanic state f =
   let f' = Coerce.cfunction f in
   let old = F.atpanic state f' in

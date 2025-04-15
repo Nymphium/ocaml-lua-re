@@ -15,4 +15,5 @@ depends: [
   "ppx_deriving"
 
   "alcotest" { with-test }
+  "odoc" { with-doc }
 ]

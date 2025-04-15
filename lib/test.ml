@@ -1,10 +1,11 @@
-open Lib
+open Lua
+open Lua.CAPI.Functions
 open Alcotest
 
 (* Test 1: 状態管理テスト
    - 状態生成後、初期のスタックトップが 0 であることを検証 *)
 let test_state_management () =
-  Lib.run
+  Lua.run
   @@ fun state ->
   let top = gettop state in
   check int "初期スタックトップが 0" 0 top
@@ -13,7 +14,7 @@ let test_state_management () =
 (* Test 2: do_string とグローバル変数操作テスト
    - Lua スクリプトでグローバル変数を設定し、取り出せることを検証 *)
 let test_globals () =
-  Lib.run
+  Lua.run
   @@ fun state ->
   ignore @@ dostring state "x = 42";
   let x = get_global state "x" checknumber in
@@ -23,7 +24,7 @@ let test_globals () =
 (* Test 3: スタック操作テスト
    - 数値のプッシュ・取得後、スタックが正しく操作されることを検証 *)
 let test_stack_operations () =
-  Lib.run
+  Lua.run
   @@ fun state ->
   pushnumber state 3.1415;
   let top = gettop state in
@@ -34,8 +35,22 @@ let test_stack_operations () =
   check int "要素削除後のスタックトップ" 0 (gettop state)
 ;;
 
+(* TODO: correctly fail and get error message *)
+let test_setpanic () =
+  Lua.run
+  @@ fun state ->
+  let _ =
+    Lua.setpanic state
+    @@ fun state' ->
+    print_endline "Panic!";
+    ignore @@ pushstring state' "Panic!";
+    1
+  in
+  checkany state @@ dostring state {|error("test panic")|}
+;;
+
 let test_buffer () =
-  Lib.run
+  Lua.run
   @@ fun state ->
   let b = Buffer.create state in
   addstring b "Hello, ";
@@ -47,7 +62,7 @@ let test_buffer () =
 (* Test 4: 関数呼び出しテスト
    - Lua 側で定義した加算関数 add(a,b) を呼び出し、結果が正しいか検証 *)
 let test_function_call () =
-  Lib.run
+  Lua.run
   @@ fun state ->
   ignore @@ dostring state "function add(a, b) return a + b end";
   (* Lua グローバル関数 add を取得 *)
@@ -76,7 +91,7 @@ let test_function_call () =
 (* Test 6: コルーチン（Lua スレッド）テスト
    - 新たに Lua のスレッドを生成し、独立したスタックでコードが実行できるか検証 *)
 let test_coroutine () =
-  Lib.run
+  Lua.run
   @@ fun state ->
   let th = newthread state in
   ignore @@ dostring th "return 100";
@@ -88,7 +103,7 @@ let test_coroutine () =
 (* Test 7: ユーザデータとメタテーブル操作テスト
    - ユーザデータ生成後、Lua 側でメタテーブルを設定し、それが正しく反映されることを検証 *)
 let test_userdata_metatable () =
-  Lib.run
+  Lua.run
   @@ fun state ->
   (* ユーザデータを作成：サイズは 1024 バイト *)
   let _userdata = newuserdata state (Unsigned.Size_t.of_int 1024) in
@@ -113,7 +128,7 @@ let () =
           (test_case "Hello" `Quick
            @@ fun () ->
            ignore
-           @@ Lib.run
+           @@ Lua.run
            @@ fun state ->
            let i = dostring state {|print(_VERSION)|} in
            assert (i = 0))
@@ -121,6 +136,7 @@ let () =
         ] )
     ; "Stack Operations", [ test_case "Test Stack" `Quick test_stack_operations ]
     ; "Buffer", [ test_case "Test Buffer" `Quick test_buffer ]
+    ; "Wrapper", [ test_case "Test Wrapper" `Quick test_setpanic ]
     ; "Function Calls", [ test_case "Test Function Call" `Quick test_function_call ]
     ; "Coroutines", [ test_case "Test Coroutine" `Quick test_coroutine ]
     ; ( "Userdata and Metatable"

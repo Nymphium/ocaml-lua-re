@@ -1,12 +1,12 @@
 (library
- (name lib)
+ (name lua)
  (public_name lua-re)
  (modules :standard \ test)
- (libraries lua-re.stub)
+ (libraries lua-re.stub ctypes.foreign)
  (preprocess
   (pps ppx_deriving.std)))
 
 (test
  (name test)
  (modules test)
- (libraries lib ctypes alcotest))
+ (libraries lua ctypes alcotest))

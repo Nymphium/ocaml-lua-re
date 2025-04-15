@@ -1,8 +1,7 @@
 (library
- (name stub)
+ (name LuaStub)
  (public_name lua-re.stub)
  (libraries ctypes ctypes.foreign)
- (wrapped false)
  (modules :standard \ discover)
  (virtual_deps conf-lua)
  (foreign_stubs

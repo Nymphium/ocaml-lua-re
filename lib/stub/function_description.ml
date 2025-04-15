@@ -5,11 +5,11 @@ module Functions (F : Ctypes.FOREIGN) = struct
   module T = Types_generated
 
   open struct
-    let ( @:: ) name t = foreign name t
+    let ( @:: ) name t = F.foreign name t
   end
 
   module Const = struct
-    let version = "lua_version_helper" @:: void @-> returning string
+    let version = "lua_version_helper" @:: void @-> returning @@ string
     let version_major = "lua_version_major_helper" @:: void @-> returning string
     let version_minor = "lua_version_minor_helper" @:: void @-> returning string
     let version_release = "lua_version_release_helper" @:: void @-> returning string
@@ -252,7 +252,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
   ;;
 
   let upvalueid =
-    "lua_upvalueid" @:: ptr T.State.t @-> int @-> int @-> returning (ptr void)
+    "lua_upvalueid" @:: ptr T.State.t @-> int @-> int @-> returning @@ ptr void
   ;;
 
   let upvaluejoin =
@@ -283,8 +283,8 @@ module Functions (F : Ctypes.FOREIGN) = struct
   let callmeta = "luaL_callmeta" @:: ptr T.State.t @-> int @-> string @-> returning int
   let checkany = "luaL_checkany" @:: ptr T.State.t @-> int @-> returning void
   let checkinteger = "luaL_checkinteger" @:: ptr T.State.t @-> int @-> returning T.integer
-  let checkint = "luaL_checkint" @:: ptr T.State.t @-> int @-> returning T.int
-  let checklong = "luaL_checklong" @:: ptr T.State.t @-> int @-> returning T.int
+  let checkint = "luaL_checkint" @:: ptr T.State.t @-> int @-> returning int
+  let checklong = "luaL_checklong" @:: ptr T.State.t @-> int @-> returning int
 
   let checklstring =
     "luaL_checklstring" @:: ptr T.State.t @-> int @-> ptr size_t @-> returning @@ string
@@ -309,7 +309,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
   let checktype = "luaL_checktype" @:: ptr T.State.t @-> int @-> int @-> returning void
 
   let checkudata =
-    "luaL_checkudata" @:: ptr T.State.t @-> int @-> string @-> returning (ptr void)
+    "luaL_checkudata" @:: ptr T.State.t @-> int @-> string @-> returning @@ ptr void
   ;;
 
   let checkunsigned =
@@ -382,13 +382,13 @@ module Functions (F : Ctypes.FOREIGN) = struct
 
   let newmetatable = "luaL_newmetatable" @:: ptr T.State.t @-> string @-> returning int
   let open_libs = "luaL_openlibs" @:: ptr T.State.t @-> returning void
-  let optint = "luaL_optint" @:: ptr T.State.t @-> int @-> int @-> returning T.int
+  let optint = "luaL_optint" @:: ptr T.State.t @-> int @-> int @-> returning int
 
   let optinteger =
     "luaL_optinteger" @:: ptr T.State.t @-> int @-> T.integer @-> returning T.integer
   ;;
 
-  let optlong = "luaL_optlong" @:: ptr T.State.t @-> int @-> T.int @-> returning T.int
+  let optlong = "luaL_optlong" @:: ptr T.State.t @-> int @-> int @-> returning int
 
   let optlstring =
     "luaL_optlstring"
@@ -442,7 +442,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
   let setmetatable' = "luaL_setmetatable" @:: ptr T.State.t @-> string @-> returning void
 
   let testudata =
-    "luaL_testudata" @:: ptr T.State.t @-> int @-> string @-> returning (ptr void)
+    "luaL_testudata" @:: ptr T.State.t @-> int @-> string @-> returning @@ ptr void
   ;;
 
   let tolstring' =

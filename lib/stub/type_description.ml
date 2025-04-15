@@ -1,9 +1,10 @@
-open Ctypes
-
-module Types (S : TYPE) = struct
+module Types (S : Ctypes.TYPE) = struct
   open S
 
-  type nonrec 'a typ = 'a typ
+  type 'a typ = 'a S.typ
+  type 'a ptr = 'a Ctypes_static.ptr
+  type 'a structure = 'a Ctypes.structure
+  type 'a static_funptr = 'a S.static_funptr
 
   open struct
     let ( @:! ) name t = constant name t
@@ -22,6 +23,11 @@ module Types (S : TYPE) = struct
   let unsigned = uint
   let integer = ptrdiff_t
   let lu_byte = uchar
+  let string = const string
+  let void = void
+  let ptr = ptr
+  let size_t = size_t
+  let char = char
 
   module State = struct
     type t = unit ptr
@@ -30,9 +36,9 @@ module Types (S : TYPE) = struct
   end
 
   module Buffer = struct
-    type t
+    type t = [ `luaL_Buffer ] structure
 
-    let t : t structure typ = structure "luaL_Buffer"
+    let t : t typ = structure "luaL_Buffer"
     let b = t.@:["b"] <- string
     let size = t.@:["size"] <- size_t
     let n = t.@:["n"] <- size_t
@@ -65,7 +71,7 @@ module Types (S : TYPE) = struct
 
   module CFunction = struct
     (* NOT abstract type *)
-    type t = (State.t Ctypes_static.ptr -> int) static_funptr
+    type t = (State.t ptr -> int) static_funptr
 
     let t : t typ =
       typedef' "lua_CFunction" @@ static_funptr @@ ptr State.t @-> returning int
@@ -74,12 +80,7 @@ module Types (S : TYPE) = struct
 
   module Reader = struct
     (* NOT abstract type *)
-    type t =
-      (State.t Ctypes_static.ptr
-       -> unit Ctypes_static.ptr
-       -> Unsigned.size_t Ctypes_static.ptr
-       -> string)
-        static_funptr
+    type t = (State.t ptr -> unit ptr -> Unsigned.size_t ptr -> string) static_funptr
 
     let t : t typ =
       typedef' "lua_Reader"
@@ -108,9 +109,9 @@ module Types (S : TYPE) = struct
   end
 
   module Reg = struct
-    type t
+    type t = [ `luaL_Reg ] structure
 
-    let t : t structure typ = typedef' "luaL_Reg" @@ structure "luaL_Reg"
+    let t : t typ = typedef' "luaL_Reg" @@ structure "luaL_Reg"
     let name = t.@:["name"] <- const string
     let func = t.@:["func"] <- CFunction.t
     let () = seal t
@@ -123,9 +124,9 @@ module Types (S : TYPE) = struct
   end
 
   module Debug = struct
-    type t
+    type t = [ `lua_Debug ] structure
 
-    let t' : t structure typ = structure "lua_Debug"
+    let t' : t typ = structure "lua_Debug"
     let event = t'.@:["event"] <- int
     let name = t'.@:["name"] <- const string
     let namewhat = t'.@:["namewhat"] <- const string
@@ -184,9 +185,7 @@ module Types (S : TYPE) = struct
     (* overwrite *)
 
     (* NOT abstract type *)
-    type t =
-      (State.t Ctypes_static.ptr -> Debug.t structure Ctypes_static.ptr -> unit)
-        static_funptr
+    type t = (State.t ptr -> Debug.t ptr -> unit) static_funptr
 
     let t : t typ =
       typedef' "lua_Hook"

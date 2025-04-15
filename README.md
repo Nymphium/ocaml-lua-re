@@ -10,5 +10,8 @@ $ direnv allow
 $ dune build
 ```
 
+# Documentation
+https://nymphium.github.io/ocaml-lua-re/
+
 # LICENSE
 MIT

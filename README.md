@@ -4,6 +4,7 @@ lua-re: OCaml bindings for Lua 🌕️
 OCaml bindings for Lua 5.2 through ctypes
 
 # Installation
+<!-- $MDX skip -->
 ```bash
 $ git clone https://github.com/Nymphium/ocaml-lua-re
 $ direnv allow

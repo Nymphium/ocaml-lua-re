@@ -14,10 +14,7 @@ module Types (S : Ctypes.TYPE) = struct
     let typedef' name t = typedef t name
   end
 
-  module Const = struct
-    let version_num = "LUA_VERSION_NUM" @:! int
-  end
-
+  let version_num = "LUA_VERSION_NUM" @:! int
   let number = float
   let int = int
   let unsigned = uint
@@ -28,6 +25,45 @@ module Types (S : Ctypes.TYPE) = struct
   let ptr = ptr
   let size_t = size_t
   let char = char
+  let bool = view ~read:(fun int -> int = 0) ~write:(fun b -> if b then 0 else 1) int
+
+  module Code = struct
+    type t = int
+
+    let t : t typ = int
+    let ok = "LUA_OK" @:! t
+    let yield = "LUA_YIELD" @:! t
+    let errrun = "LUA_ERRRUN" @:! t
+    let errsyntax = "LUA_ERRSYNTAX" @:! t
+    let errmem = "LUA_ERRMEM" @:! t
+    let errerr = "LUA_ERRERR" @:! t
+    let errgcmm = "LUA_ERRGCMM" @:! t
+    let errfile = "LUA_ERRFILE" @:! t
+  end
+
+  module Ref = struct
+    type t = int
+
+    let t : t typ = int
+    let nil = "LUA_REFNIL" @:! t
+    let noref = "LUA_NOREF" @:! t
+  end
+
+  module Ltype = struct
+    type t = Unsigned.size_t
+
+    let t : t typ = size_t
+    let none = "LUA_TNONE" @:! t
+    let nil = "LUA_TNIL" @:! t
+    let number = "LUA_TNUMBER" @:! t
+    let string = "LUA_TSTRING" @:! t
+    let table = "LUA_TTABLE" @:! t
+    let function_ = "LUA_TFUNCTION" @:! t
+    let lightuserdata = "LUA_TLIGHTUSERDATA" @:! t
+    let userdata = "LUA_TUSERDATA" @:! t
+    let thread = "LUA_TTHREAD" @:! t
+    let boolean = "LUA_TBOOLEAN" @:! t
+  end
 
   module State = struct
     type t = unit ptr
@@ -36,33 +72,22 @@ module Types (S : Ctypes.TYPE) = struct
   end
 
   module Buffer = struct
-    type t = [ `luaL_Buffer ] structure
+    type t = unit ptr
 
-    let t : t typ = structure "luaL_Buffer"
-    let b = t.@:["b"] <- string
-    let size = t.@:["size"] <- size_t
-    let n = t.@:["n"] <- size_t
-    let l = t.@:["L"] <- State.t
-
-    (** TODO: char[LUAL_BUFFERSIZE] *)
-    let initb = t.@:["initb"] <- string
-
-    let () = seal t
-    let t = typedef' "luaL_Buffer" @@ t
+    let t : t typ = typedef' "luaL_Buffer" @@ ptr void
   end
 
   module Alloc = struct
     (* NOT abstract type *)
     type t =
-      (unit ptr -> unit ptr -> Unsigned.size_t -> Unsigned.size_t -> unit ptr)
-        static_funptr
+      (unit ptr -> unit ptr -> Ltype.t -> Unsigned.size_t -> unit ptr) static_funptr
 
     let t : t typ =
       typedef' "lua_Alloc"
       @@ static_funptr
       @@ ptr void
       @-> ptr void
-      @-> size_t
+      @-> Ltype.t
       @-> size_t
       @-> returning
       @@ ptr void
@@ -95,7 +120,8 @@ module Types (S : Ctypes.TYPE) = struct
 
   module Writer = struct
     (* NOT abstract type *)
-    type t = (State.t ptr -> unit ptr -> Unsigned.size_t -> unit ptr) static_funptr
+    type t =
+      (State.t ptr -> unit ptr -> Unsigned.size_t -> unit ptr -> Code.t) static_funptr
 
     let t : t typ =
       typedef' "lua_Writer"
@@ -103,8 +129,8 @@ module Types (S : Ctypes.TYPE) = struct
       @@ ptr State.t
       @-> (const @@ ptr void)
       @-> size_t
-      @-> returning
-      @@ ptr void
+      @-> ptr void
+      @-> returning Code.t
     ;;
   end
 
@@ -115,12 +141,6 @@ module Types (S : Ctypes.TYPE) = struct
     let name = t.@:["name"] <- const string
     let func = t.@:["func"] <- CFunction.t
     let () = seal t
-  end
-
-  module Callinfo = struct
-    type t = unit ptr
-
-    let t : t typ = ptr void
   end
 
   module Debug = struct
@@ -137,29 +157,38 @@ module Types (S : Ctypes.TYPE) = struct
     let lastlinedefined = t'.@:["lastlinedefined"] <- int
     let nups = t'.@:["nups"] <- uchar
     let nparams = t'.@:["nparams"] <- uchar
-    let isvararg = t'.@:["isvararg"] <- char
-    let istailcall = t'.@:["istailcall"] <- char
+    let isvararg = t'.@:["isvararg"] <- bool
+    let istailcall = t'.@:["istailcall"] <- bool
     let short_src = t'.@:["short_src"] <- string
-    let i_ci = t'.@:["i_ci"] <- ptr Callinfo.t
     let () = seal t'
     let t = typedef t' "lua_Debug"
   end
 
   module Op = struct
-    let t = int
+    type t = int
+
+    let t : t typ = int
     let add = "LUA_OPADD" @:! t
     let sub = "LUA_OPSUB" @:! t
     let mul = "LUA_OPMUL" @:! t
     let div = "LUA_OPDIV" @:! t
     let mod_ = "LUA_OPMOD" @:! t
     let pow = "LUA_OPPOW" @:! t
-    let eq = "LUA_OPEQ" @:! t
-    let lt = "LUA_OPLT" @:! t
-    let le = "LUA_OPLE" @:! t
+
+    module Comp = struct
+      type nonrec t = t
+
+      let t : t typ = t
+      let eq = "LUA_OPEQ" @:! t
+      let lt = "LUA_OPLT" @:! t
+      let le = "LUA_OPLE" @:! t
+    end
   end
 
   module Gc = struct
-    let t = int
+    type t = int
+
+    let t : t typ = int
     let stop = "LUA_GCSTOP" @:! t
     let restart = "LUA_GCRESTART" @:! t
     let collect = "LUA_GCCOLLECT" @:! t
@@ -175,12 +204,14 @@ module Types (S : Ctypes.TYPE) = struct
   end
 
   module Hook = struct
-    let t = int
-    let call = "LUA_HOOKCALL" @:! t
-    let ret = "LUA_HOOKRET" @:! t
-    let line = "LUA_HOOKLINE" @:! t
-    let count = "LUA_HOOKCOUNT" @:! t
-    let tailcall = "LUA_HOOKTAILCALL" @:! t
+    type _t = int
+
+    let _t : _t typ = int
+    let call = "LUA_HOOKCALL" @:! _t
+    let ret = "LUA_HOOKRET" @:! _t
+    let line = "LUA_HOOKLINE" @:! _t
+    let count = "LUA_HOOKCOUNT" @:! _t
+    let tailcall = "LUA_HOOKTAILCALL" @:! _t
 
     (* overwrite *)
 
@@ -197,7 +228,9 @@ module Types (S : Ctypes.TYPE) = struct
   end
 
   module Mask = struct
-    let t = int
+    type t = int
+
+    let t : t typ = int
     let call = "LUA_MASKCALL" @:! t
     let ret = "LUA_MASKRET" @:! t
     let line = "LUA_MASKLINE" @:! t

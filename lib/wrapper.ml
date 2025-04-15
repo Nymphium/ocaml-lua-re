@@ -14,8 +14,11 @@ let create () =
 ;;
 
 (** Creates {{!LuaStub.Types.State.type-t} [lua_State]} by {!create} and automatically closes the state.
-    {[
-      run @@ fun state -> ignore @@ dostring state {|print("Hello, from", _VERSION)|}
+    {@ocaml[
+      # let open Lua in
+          run @@ fun state -> ignore @@ CAPI.Functions.dostring state {|print("Hello, from", _VERSION)|};;
+      Hello, from	Lua 5.2
+      - : unit = ()
     ]} *)
 let run f =
   let state = create () in
@@ -27,12 +30,13 @@ let run f =
 ;;
 
 (** Gets the global variable [name] from the [state] and check the type with [checker].
-    {[
-      run
-      @@ fun state ->
-      ignore @@ dostring state "x = 42";
-      let x = get_global state "x" checknumber in
-      assert (x = 42.0)
+    {@ocaml[
+      # let open Lua in
+        run @@ fun state ->
+          ignore @@ CAPI.Functions.dostring state "x = 42";
+          let x = get_global state "x" checknumber in
+          x;;
+      - : float = 42.
     ]} *)
 let get_global state name checker =
   let () = F.getglobal state name in
@@ -41,16 +45,15 @@ let get_global state name checker =
 
 (** Sets panic handler.
     {[
-      run
-      @@ fun state ->
-      let () =
-        ignore
-        @@ setpanic state
-        @@ fun state' ->
-        print_endline "Panic!";
-        ignore @@ pushstring state' "Panic!"
-      in
-      ignore @@ call state 0 0 0 (* panic here *)
+      # let open Lua in
+        run @@ fun state ->
+          let () =
+            ignore @@ setpanic state @@ fun state' ->
+              print_endline "Panic!";
+              ignore @@ pushstring state' "Panic!"
+          in
+          ignore @@ call state 0 0 0 (* panic here *);;
+      - : unit = ()
     ]} *)
 let setpanic state f =
   let f' = Coerce.cfunction f in

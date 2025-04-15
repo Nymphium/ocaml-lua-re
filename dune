@@ -1,1 +1,4 @@
 (documentation)
+
+(mdx
+ (libraries lua-re lua-re.stub))

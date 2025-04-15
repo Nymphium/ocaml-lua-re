@@ -7,7 +7,7 @@ end
 
 (** Creates a {{!LuaStub.Types.Buffer.type-t} [lua_Buffer]}. *)
 let create ?size state =
-  let b = C.allocate T.Buffer.t @@ C.make T.Buffer.t in
+  let b = C.allocate T.Buffer.t @@ C.coerce C.(ptr void) T.Buffer.t C.null in
   let () =
     match size with
     | Some size -> F.buffinitsize state b size

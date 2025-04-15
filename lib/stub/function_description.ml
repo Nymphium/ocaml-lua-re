@@ -38,13 +38,21 @@ module Functions (F : Ctypes.FOREIGN) = struct
     @-> returning void
   ;;
 
-  let checkstack = "lua_checkstack" @:: ptr T.State.t @-> int @-> returning int
+  let checkstack = "lua_checkstack" @:: ptr T.State.t @-> int @-> returning bool
   let close = "lua_close" @:: ptr T.State.t @-> returning void
-  let compare = "lua_compare" @:: ptr T.State.t @-> int @-> int @-> int @-> returning int
+
+  let compare =
+    "lua_compare" @:: ptr T.State.t @-> int @-> int @-> T.Op.Comp.t @-> returning int
+  ;;
+
   let concat = "lua_concat" @:: ptr T.State.t @-> int @-> returning void
   let copy = "lua_copy" @:: ptr T.State.t @-> int @-> int @-> returning void
   let createtable = "lua_createtable" @:: ptr T.State.t @-> int @-> int @-> returning void
-  let dump = "lua_dump" @:: ptr T.State.t @-> T.CFunction.t @-> ptr void @-> returning int
+
+  let dump =
+    "lua_dump" @:: ptr T.State.t @-> T.CFunction.t @-> ptr void @-> returning T.Code.t
+  ;;
+
   let error = "lua_error" @:: ptr T.State.t @-> returning int
   let gc = "lua_gc" @:: ptr T.State.t @-> T.Gc.t @-> int @-> returning int
 
@@ -52,7 +60,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
     "lua_getallocf" @:: ptr T.State.t @-> (ptr @@ ptr void) @-> returning T.Alloc.t
   ;;
 
-  let getctx = "lua_getctx" @:: ptr T.State.t @-> ptr int @-> returning int
+  let getctx = "lua_getctx" @:: ptr T.State.t @-> ptr int @-> returning T.Code.t
   let getfield = "lua_getfield" @:: ptr T.State.t @-> int @-> string @-> returning void
   let getglobal = "lua_getglobal" @:: ptr T.State.t @-> string @-> returning void
   let getmetatable = "lua_getmetatable" @:: ptr T.State.t @-> int @-> returning int
@@ -60,19 +68,19 @@ module Functions (F : Ctypes.FOREIGN) = struct
   let gettop = "lua_gettop" @:: ptr T.State.t @-> returning int
   let getuservalue = "lua_getuservalue" @:: ptr T.State.t @-> int @-> returning void
   let insert = "lua_insert" @:: ptr T.State.t @-> int @-> returning void
-  let isboolean = "lua_isboolean" @:: ptr T.State.t @-> int @-> returning int
+  let isboolean = "lua_isboolean" @:: ptr T.State.t @-> int @-> returning bool
 
   (*let isfunction = "lua_isfunction" @:: ptr T.State.t @-> int @-> returning int*)
-  let iscfunction = "lua_isfunction" @:: ptr T.State.t @-> int @-> returning int
-  let islightuserdata = "lua_islightuserdata" @:: ptr T.State.t @-> int @-> returning int
-  let isnil = "lua_isnil" @:: ptr T.State.t @-> int @-> returning int
-  let isnone = "lua_isnone" @:: ptr T.State.t @-> int @-> returning int
-  let isnoneornil = "lua_isnoneornil" @:: ptr T.State.t @-> int @-> returning int
-  let isnumber = "lua_isnumber" @:: ptr T.State.t @-> int @-> returning int
-  let isstring = "lua_isstring" @:: ptr T.State.t @-> int @-> returning int
-  let istable = "lua_istable" @:: ptr T.State.t @-> int @-> returning int
-  let isthread = "lua_isthread" @:: ptr T.State.t @-> int @-> returning int
-  let isuserdata = "lua_isuserdata" @:: ptr T.State.t @-> int @-> returning int
+  let iscfunction = "lua_isfunction" @:: ptr T.State.t @-> int @-> returning bool
+  let islightuserdata = "lua_islightuserdata" @:: ptr T.State.t @-> int @-> returning bool
+  let isnil = "lua_isnil" @:: ptr T.State.t @-> int @-> returning bool
+  let isnone = "lua_isnone" @:: ptr T.State.t @-> int @-> returning bool
+  let isnoneornil = "lua_isnoneornil" @:: ptr T.State.t @-> int @-> returning bool
+  let isnumber = "lua_isnumber" @:: ptr T.State.t @-> int @-> returning bool
+  let isstring = "lua_isstring" @:: ptr T.State.t @-> int @-> returning bool
+  let istable = "lua_istable" @:: ptr T.State.t @-> int @-> returning bool
+  let isthread = "lua_isthread" @:: ptr T.State.t @-> int @-> returning bool
+  let isuserdata = "lua_isuserdata" @:: ptr T.State.t @-> int @-> returning bool
   let len = "lua_len" @:: ptr T.State.t @-> int @-> returning void
 
   let load =
@@ -82,7 +90,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
     @-> ptr void
     @-> string
     @-> string
-    @-> returning int
+    @-> returning T.Code.t
   ;;
 
   let newstate = "lua_newstate" @:: T.Alloc.t @-> ptr void @-> returning @@ ptr T.State.t
@@ -91,7 +99,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
   let newthread = "lua_newthread" @:: ptr T.State.t @-> returning @@ ptr T.State.t
   let newuserdata = "lua_newuserdata" @:: ptr T.State.t @-> size_t @-> returning void
   let next = "lua_next" @:: ptr T.State.t @-> int @-> returning int
-  let pcall = "lua_pcall" @:: ptr T.State.t @-> int @-> int @-> int @-> returning int
+  let pcall = "lua_pcall" @:: ptr T.State.t @-> int @-> int @-> int @-> returning T.Code.t
 
   let pcallk =
     "lua_pcallk"
@@ -101,7 +109,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
     @-> int
     @-> int
     @-> T.CFunction.t
-    @-> returning int
+    @-> returning T.Code.t
   ;;
 
   let pop = "lua_pop" @:: ptr T.State.t @-> int @-> returning void
@@ -149,7 +157,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
     "lua_pushvfstring" @:: ptr T.State.t @-> string @-> ptr void @-> returning @@ string
   ;;
 
-  let rawequal = "lua_rawequal" @:: ptr T.State.t @-> int @-> int @-> returning int
+  let rawequal = "lua_rawequal" @:: ptr T.State.t @-> int @-> int @-> returning T.bool
   let rawget = "lua_rawget" @:: ptr T.State.t @-> int @-> returning void
   let rawgeti = "lua_rawgeti" @:: ptr T.State.t @-> int @-> T.integer @-> returning void
   let rawgetp = "lua_rawgetp" @:: ptr T.State.t @-> int @-> ptr void @-> returning void
@@ -163,7 +171,10 @@ module Functions (F : Ctypes.FOREIGN) = struct
 
   let remove = "lua_remove" @:: ptr T.State.t @-> int @-> returning void
   let replace = "lua_replace" @:: ptr T.State.t @-> int @-> returning void
-  let resume = "lua_resume" @:: ptr T.State.t @-> ptr T.State.t @-> int @-> returning int
+
+  let resume =
+    "lua_resume" @:: ptr T.State.t @-> ptr T.State.t @-> int @-> returning T.Code.t
+  ;;
 
   let setallocf =
     "lua_setallocf" @:: ptr T.State.t @-> T.Alloc.t @-> ptr void @-> returning void
@@ -175,8 +186,8 @@ module Functions (F : Ctypes.FOREIGN) = struct
   let settable = "lua_settable" @:: ptr T.State.t @-> int @-> returning void
   let settop = "lua_settop" @:: ptr T.State.t @-> int @-> returning void
   let setuservalue = "lua_setuservalue" @:: ptr T.State.t @-> int @-> returning void
-  let status = "lua_status" @:: ptr T.State.t @-> returning int
-  let toboolean = "lua_toboolean" @:: ptr T.State.t @-> int @-> returning int
+  let status = "lua_status" @:: ptr T.State.t @-> returning T.Code.t
+  let toboolean = "lua_toboolean" @:: ptr T.State.t @-> int @-> returning T.bool
 
   let tocfunction =
     "lua_tocfunction" @:: ptr T.State.t @-> int @-> returning T.CFunction.t
@@ -208,23 +219,28 @@ module Functions (F : Ctypes.FOREIGN) = struct
   ;;
 
   let touserdata = "lua_touserdata" @:: ptr T.State.t @-> int @-> returning @@ ptr void
-  let type_ = "lua_type" @:: ptr T.State.t @-> int @-> returning int
+  let type_ = "lua_type" @:: ptr T.State.t @-> int @-> returning T.Ltype.t
   let typename = "lua_typename" @:: ptr T.State.t @-> int @-> returning @@ string
   let upvalueindex = "lua_upvalueindex" @:: int @-> returning int
   let version = "lua_version" @:: ptr T.State.t @-> returning @@ string
   let xmem = "lua_xmove" @:: ptr T.State.t @-> ptr T.State.t @-> int @-> returning void
-  let yield = "lua_yield" @:: ptr T.State.t @-> int @-> returning int
+  let yield = "lua_yield" @:: ptr T.State.t @-> int @-> returning T.Code.t
 
   let yieldk =
-    "lua_yieldk" @:: ptr T.State.t @-> int @-> int @-> T.CFunction.t @-> returning int
+    "lua_yieldk"
+    @:: ptr T.State.t
+    @-> int
+    @-> int
+    @-> T.CFunction.t
+    @-> returning T.Code.t
   ;;
 
   let gethook = "lua_gethook" @:: ptr T.State.t @-> returning T.Hook.t
-  let gethookmask = "lua_gethookmask" @:: ptr T.State.t @-> returning int
+  let gethookmask = "lua_gethookmask" @:: ptr T.State.t @-> returning T.Mask.t
   let gethookcount = "lua_gethookcount" @:: ptr T.State.t @-> returning int
 
   let getinfo =
-    "lua_getinfo" @:: ptr T.State.t @-> string @-> ptr T.Debug.t @-> returning int
+    "lua_getinfo" @:: ptr T.State.t @-> string @-> ptr T.Debug.t @-> returning T.Code.t
   ;;
 
   let getlocal =
@@ -240,7 +256,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
   ;;
 
   let sethook =
-    "lua_sethook" @:: ptr T.State.t @-> T.Hook.t @-> T.Mask.t @-> int @-> returning void
+    "lua_sethook" @:: ptr T.State.t @-> T.Hook.t @-> T.Mask.t @-> int @-> returning int
   ;;
 
   let setlocal =
@@ -280,7 +296,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
     "luaL_buffinitsize" @:: ptr T.State.t @-> ptr T.Buffer.t @-> size_t @-> returning void
   ;;
 
-  let callmeta = "luaL_callmeta" @:: ptr T.State.t @-> int @-> string @-> returning int
+  let callmeta = "luaL_callmeta" @:: ptr T.State.t @-> int @-> string @-> returning bool
   let checkany = "luaL_checkany" @:: ptr T.State.t @-> int @-> returning void
   let checkinteger = "luaL_checkinteger" @:: ptr T.State.t @-> int @-> returning T.integer
   let checkint = "luaL_checkint" @:: ptr T.State.t @-> int @-> returning int
@@ -306,7 +322,10 @@ module Functions (F : Ctypes.FOREIGN) = struct
   ;;
 
   let checkstring = "luaL_checkstring" @:: ptr T.State.t @-> int @-> returning @@ string
-  let checktype = "luaL_checktype" @:: ptr T.State.t @-> int @-> int @-> returning void
+
+  let checktype =
+    "luaL_checktype" @:: ptr T.State.t @-> int @-> T.Ltype.t @-> returning void
+  ;;
 
   let checkudata =
     "luaL_checkudata" @:: ptr T.State.t @-> int @-> string @-> returning @@ ptr void
@@ -317,8 +336,8 @@ module Functions (F : Ctypes.FOREIGN) = struct
   ;;
 
   let checkversion = "luaL_checkversion" @:: ptr T.State.t @-> returning void
-  let dofile = "luaL_dofile" @:: ptr T.State.t @-> string @-> returning int
-  let dostring = "luaL_dostring" @:: ptr T.State.t @-> string @-> returning int
+  let dofile = "luaL_dofile" @:: ptr T.State.t @-> string @-> returning T.bool
+  let dostring = "luaL_dostring" @:: ptr T.State.t @-> string @-> returning T.bool
 
   (** Wrapper for luaL_error.
       ptr lua_State -> string -> string list -> int -> int *)
@@ -338,13 +357,13 @@ module Functions (F : Ctypes.FOREIGN) = struct
   ;;
 
   let getmetafield =
-    "luaL_getmetafield" @:: ptr T.State.t @-> int @-> string @-> returning int
+    "luaL_getmetafield" @:: ptr T.State.t @-> int @-> string @-> returning T.bool
   ;;
 
   let getmetatable' = "luaL_getmetatable" @:: ptr T.State.t @-> string @-> returning void
 
   let getsubtable =
-    "luaL_getsubtable" @:: ptr T.State.t @-> int @-> string @-> returning int
+    "luaL_getsubtable" @:: ptr T.State.t @-> int @-> string @-> returning bool
   ;;
 
   let gsub =
@@ -360,27 +379,27 @@ module Functions (F : Ctypes.FOREIGN) = struct
     @-> size_t
     @-> string
     @-> string
-    @-> returning int
+    @-> returning T.Code.t
   ;;
 
   let loadbuffer =
     "luaL_loadbuffer" @:: ptr T.State.t @-> string @-> size_t @-> string @-> returning int
   ;;
 
-  let loadfile = "luaL_loadfile" @:: ptr T.State.t @-> string @-> returning int
+  let loadfile = "luaL_loadfile" @:: ptr T.State.t @-> string @-> returning T.Code.t
 
   let loadfilex =
-    "luaL_loadfilex" @:: ptr T.State.t @-> string @-> string @-> returning int
+    "luaL_loadfilex" @:: ptr T.State.t @-> string @-> string @-> returning T.Code.t
   ;;
 
-  let loadstring = "luaL_loadstring" @:: ptr T.State.t @-> string @-> returning int
+  let loadstring = "luaL_loadstring" @:: ptr T.State.t @-> string @-> returning T.Code.t
   let newlib = "luaL_newlib" @:: ptr T.State.t @-> ptr T.Reg.t @-> returning void
 
   let newlibtable =
     "luaL_newlibtable_helper" @:: ptr T.State.t @-> ptr T.Reg.t @-> int @-> returning void
   ;;
 
-  let newmetatable = "luaL_newmetatable" @:: ptr T.State.t @-> string @-> returning int
+  let newmetatable = "luaL_newmetatable" @:: ptr T.State.t @-> string @-> returning T.bool
   let open_libs = "luaL_openlibs" @:: ptr T.State.t @-> returning void
   let optint = "luaL_optint" @:: ptr T.State.t @-> int @-> int @-> returning int
 
@@ -424,7 +443,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
     "luaL_pushresultsize" @:: ptr T.Buffer.t @-> size_t @-> returning void
   ;;
 
-  let ref = "luaL_ref" @:: ptr T.State.t @-> int @-> returning int
+  let ref = "luaL_ref" @:: ptr T.State.t @-> int @-> returning T.Ref.t
 
   let requiref =
     "luaL_requiref"
@@ -459,6 +478,6 @@ module Functions (F : Ctypes.FOREIGN) = struct
   ;;
 
   let typename' = "luaL_typename" @:: ptr T.State.t @-> int @-> returning @@ string
-  let unref = "luaL_unref" @:: ptr T.State.t @-> int @-> int @-> returning void
+  let unref = "luaL_unref" @:: ptr T.State.t @-> int @-> T.Ref.t @-> returning void
   let where = "luaL_where" @:: ptr T.State.t @-> int @-> returning void
 end

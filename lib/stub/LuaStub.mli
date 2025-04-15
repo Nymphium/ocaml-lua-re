@@ -6,10 +6,8 @@ open Ctypes
 
 (** [Types] is for types and constants. *)
 module Types : sig
-  module Const : sig
-    (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_VERSION_NUM} [LUA_VERSION_NUM]} *)
-    val version_num : int
-  end
+  (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_VERSION_NUM} [LUA_VERSION_NUM]} *)
+  val version_num : int
 
   (**/**)
 
@@ -31,6 +29,54 @@ module Types : sig
 
   (**/**)
 
+  (** [bool] is a wrapper for 0/1 value. *)
+  val bool : bool typ
+
+  (** [Code.t] represents {{:https://www.lua.org/source/5.2/lua.h.html#LUA_OK} [LUA_OK]} and other error codes. *)
+  module Code : sig
+    type t
+
+    val t : t typ
+
+    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OK> *)
+    val ok : t
+
+    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_YIELD> *)
+    val yield : t
+
+    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_ERRRUN> *)
+    val errrun : t
+
+    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_ERRSYNTAX> *)
+    val errsyntax : t
+
+    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_ERRMEM> *)
+    val errmem : t
+
+    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_ERRERR> *)
+    val errerr : t
+
+    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_ERRGCMM> *)
+    val errgcmm : t
+
+    (** @see <https://www.lua.org/source/5.2/lauxlib.h.html#LUA_ERRFILE> *)
+    val errfile : t
+  end
+
+  (* * [Ref.t] represents {{:https://www.lua.org/source/5.2/lua.h.html#LUA_REFNIL} [LUA_REFNIL]} and)
+     {{:https://www.lua.org/source/5.2/lua.h.html#LUA_NOREF} [LUA_NOREF]}. *)
+  module Ref : sig
+    type t
+
+    val t : t typ
+
+    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_REFNIL> *)
+    val nil : t
+
+    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_NOREF> *)
+    val noref : t
+  end
+
   (** [State.t] represents {{:https://www.lua.org/manual/5.2/manual.html#lua_State} [lua_State]}. *)
   module State : sig
     type t
@@ -38,23 +84,11 @@ module Types : sig
     val t : t typ
   end
 
-  (** [Callinfo.t] represents {{:https://www.lua.org/source/5.2/lstate.h.html#CallInfo} [Callinfo]}. *)
-  module Callinfo : sig
+  (** [Buffer.t] represents {{:https://www.lua.org/source/5.2/lauxlib.h.html#luaL_Buffer} [luaL_Buffer]}. *)
+  module Buffer : sig
     type t
 
     val t : t typ
-  end
-
-  (** [Buffer.t] represents {{:https://www.lua.org/source/5.2/lauxlib.h.html#luaL_Buffer} [luaL_Buffer]}. *)
-  module Buffer : sig
-    type t = [ `luaL_Buffer ] structure
-
-    val t : t typ
-    val b : (string, t) field
-    val size : (Unsigned.size_t, t) field
-    val n : (Unsigned.size_t, t) field
-    val l : (State.t, t) field
-    val initb : (string, t) field
   end
 
   (** [Alloc.t] is a wrapper for {{:https://www.lua.org/manual/5.2/manual.html#lua_Alloc} [lua_Alloc]}. *)
@@ -82,7 +116,8 @@ module Types : sig
 
   (** [Writer.t] is a wrapper for {{:https://www.lua.org/manual/5.2/manual.html#lua_Writer} [lua_Writer]}. *)
   module Writer : sig
-    type t = (State.t ptr -> unit ptr -> Unsigned.size_t -> unit ptr) static_funptr
+    type t =
+      (State.t ptr -> unit ptr -> Unsigned.size_t -> unit ptr -> Code.t) static_funptr
 
     val t : t typ
   end
@@ -111,98 +146,114 @@ module Types : sig
     val lastlinedefined : (int, t) field
     val nups : (Unsigned.uchar, t) field
     val nparams : (Unsigned.uchar, t) field
-    val isvararg : (char, t) field
-    val istailcall : (char, t) field
+    val isvararg : (bool, t) field
+    val istailcall : (bool, t) field
     val short_src : (string, t) field
-    val i_ci : (unit ptr ptr, t) field
   end
 
   (** [LUA_OP*] *)
   module Op : sig
+    type t
+
+    val t : t typ
+
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPADD> *)
-    val add : int
+    val add : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPSUB> *)
-    val sub : int
+    val sub : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPMUL> *)
-    val mul : int
+    val mul : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPMOD> *)
-    val div : int
+    val div : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPMOD> *)
-    val mod_ : int
+    val mod_ : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPPOW> *)
-    val pow : int
+    val pow : t
 
-    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPUNM> *)
-    val eq : int
+    module Comp : sig
+      type t
 
-    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPUNM> *)
-    val lt : int
+      (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPUNM> *)
+      val eq : t
 
-    (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPUNM> *)
-    val le : int
+      (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPUNM> *)
+      val lt : t
+
+      (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_OPUNM> *)
+      val le : t
+    end
   end
 
   (** GC Options *)
   module Gc : sig
+    type t
+
+    val t : t typ
+
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCSTOP> *)
-    val stop : int
+    val stop : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCRESTART> *)
-    val restart : int
+    val restart : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCCOLLECT> *)
-    val collect : int
+    val collect : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCCOUNT> *)
-    val count : int
+    val count : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCCOUNTB> *)
-    val countb : int
+    val countb : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCSTEP> *)
-    val step : int
+    val step : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCSETPAUSE> *)
-    val setpause : int
+    val setpause : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCSETSTEPMUL> *)
-    val setstepmul : int
+    val setstepmul : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCSETPAUSE> *)
-    val setmajorinc : int
+    val setmajorinc : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCSETMAJORINC> *)
-    val isrunning : int
+    val isrunning : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCISRUNNING> *)
-    val inc : int
+    val inc : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_GCINC> *)
-    val gen : int
+    val gen : t
   end
 
   (** Event operations and {{:https://www.lua.org/manual/5.2/manual.html#lua_Hook} [lua_Hook]}.
       Also see {!LuaStub.Types.Mask} *)
   module Hook : sig
+    type _t
+
+    val _t : _t typ
+
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_HOOKCALL> *)
-    val call : int
+
+    val call : _t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_HOOKRET> *)
-    val ret : int
+    val ret : _t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_HOOKLINE> *)
-    val line : int
+    val line : _t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_HOOKCOUNT> *)
-    val count : int
+    val count : _t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_HOOKTAILCALL> *)
-    val tailcall : int
+    val tailcall : _t
 
     type t = (unit ptr ptr -> Debug.t ptr -> unit) static_funptr
 
@@ -211,17 +262,58 @@ module Types : sig
 
   (** Event masks *)
   module Mask : sig
+    type t
+
+    val t : t typ
+
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_MASKCALL> *)
-    val call : int
+    val call : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_MASKRET> *)
-    val ret : int
+    val ret : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_MASKLINE> *)
-    val line : int
+    val line : t
 
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_MASKCOUNT> *)
-    val count : int
+    val count : t
+  end
+
+  (** Lua value-types, [LUA_T*] *)
+  module Ltype : sig
+    type t
+
+    val t : t typ
+
+    (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_TNONE} [LUA_TNONE]} *)
+    val none : t
+
+    (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_TNIL} [LUA_TNIL]} *)
+    val nil : t
+
+    (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_TBOOLEAN} [LUA_TBOOLEAN]} *)
+    val boolean : t
+
+    (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_TLIGHTUSERDATA} [LUA_TLIGHTUSERDATA]} *)
+    val lightuserdata : t
+
+    (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_TNUMBER} [LUA_TNUMBER]} *)
+    val number : t
+
+    (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_TSTRING} [LUA_TSTRING]} *)
+    val string : t
+
+    (** *{{:https://www.lua.org/source/5.2/lua.h.html#LUA_TTABLE} [LUA_TTABLE]} *)
+    val table : t
+
+    (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_TFUNCTION} [LUA_TFUNCTION]} *)
+    val function_ : t
+
+    (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_TUSERDATA} [LUA_TUSERDATA]} *)
+    val userdata : t
+
+    (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_TTHREAD} [LUA_TTHREAD]} *)
+    val thread : t
   end
 end
 
@@ -229,6 +321,16 @@ end
 module Functions : sig
   open Types
 
+  (** {1 [Const]} *)
+
+  (** For the limitation of ctypes, some of the constants are not defined in the direct way.
+      The contstants those which are not int-like are defined in the module [Const] and have type [unit -> 'a].
+
+      {@ocaml[
+        # let open LuaStub.Functions.Const in
+          (version_major ()) ^ "." ^ (version_minor ());;
+        - : string = "5.2"
+      ]} *)
   module Const : sig
     (** {{:https://www.lua.org/source/5.2/lua.h.html#LUA_VERSION} [LUA_VERSION]} *)
     val version : unit -> string
@@ -255,11 +357,13 @@ module Functions : sig
     val signature : unit -> string
   end
 
+  (** {1 Functions} *)
+
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_absindex} [lua_absindex]} *)
   val absindex : State.t ptr -> int -> int
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_arith} [lua_arith]} *)
-  val arith : State.t ptr -> int -> unit
+  val arith : State.t ptr -> Op.t -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_atpanic} [lua_atpanic]} *)
   val atpanic : State.t ptr -> CFunction.t -> CFunction.t
@@ -271,13 +375,13 @@ module Functions : sig
   val callk : State.t ptr -> int -> int -> int -> CFunction.t -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_checkstack} [lua_checkstack]} *)
-  val checkstack : State.t ptr -> int -> int
+  val checkstack : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_close} [lua_close]} *)
   val close : State.t ptr -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_compare} [lua_compare]} *)
-  val compare : State.t ptr -> int -> int -> int -> int
+  val compare : State.t ptr -> int -> int -> Op.Comp.t -> int
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_concat} [lua_concat]} *)
   val concat : State.t ptr -> int -> unit
@@ -289,7 +393,7 @@ module Functions : sig
   val createtable : State.t ptr -> int -> int -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_dump} [lua_dump]} *)
-  val dump : State.t ptr -> CFunction.t -> unit ptr -> int
+  val dump : State.t ptr -> CFunction.t -> unit ptr -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_error} [lua_error]} *)
   val error : State.t ptr -> int
@@ -301,7 +405,7 @@ module Functions : sig
   val getallocf : State.t ptr -> unit ptr ptr -> Alloc.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_getctx} [lua_getctx]} *)
-  val getctx : State.t ptr -> int ptr -> int
+  val getctx : State.t ptr -> int ptr -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_getfield} [lua_getfield]} *)
   val getfield : State.t ptr -> int -> string -> unit
@@ -325,49 +429,46 @@ module Functions : sig
   val insert : State.t ptr -> int -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_isboolean} [lua_isboolean]} *)
-  val isboolean : State.t ptr -> int -> int
+  val isboolean : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_iscfunction} [lua_iscfunction]} *)
-  val iscfunction : State.t ptr -> int -> int
+  val iscfunction : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_islightuserdata} [lua_islightuserdata]} *)
-  val islightuserdata : State.t ptr -> int -> int
+  val islightuserdata : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_isnil} [lua_isnil]} *)
-  val isnil : State.t ptr -> int -> int
+  val isnil : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_isnone} [lua_isnone]} *)
-  val isnone : State.t ptr -> int -> int
+  val isnone : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_isnoneornil} [lua_isnoneornil]} *)
-  val isnoneornil : State.t ptr -> int -> int
+  val isnoneornil : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_isnumber} [lua_isnumber]} *)
-  val isnumber : State.t ptr -> int -> int
+  val isnumber : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_isstring} [lua_isstring]} *)
-  val isstring : State.t ptr -> int -> int
+  val isstring : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_istable} [lua_istable]} *)
-  val istable : State.t ptr -> int -> int
+  val istable : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_isthread} [lua_isthread]} *)
-  val isthread : State.t ptr -> int -> int
+  val isthread : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_isuserdata} [lua_isuserdata]} *)
-  val isuserdata : State.t ptr -> int -> int
+  val isuserdata : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_len} [lua_len]} *)
   val len : State.t ptr -> int -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_load} [lua_load]} *)
-  val load : State.t ptr -> Reader.t -> unit ptr -> string -> string -> int
+  val load : State.t ptr -> Reader.t -> unit ptr -> string -> string -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_newstate} [lua_newstate]} *)
   val newstate : Alloc.t -> unit ptr -> State.t ptr
-
-  (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_newstate} [luaL_newstate]} *)
-  val newstate' : unit -> State.t ptr
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_newtable} [lua_newtable]} *)
   val newtable : State.t ptr -> unit
@@ -382,10 +483,10 @@ module Functions : sig
   val next : State.t ptr -> int -> int
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_pcall} [lua_pcall]} *)
-  val pcall : State.t ptr -> int -> int -> int -> int
+  val pcall : State.t ptr -> int -> int -> int -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_pcallk} [lua_pcallk]} *)
-  val pcallk : State.t ptr -> int -> int -> int -> int -> CFunction.t -> int
+  val pcallk : State.t ptr -> int -> int -> int -> int -> CFunction.t -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_pop} [lua_pop]} *)
   val pop : State.t ptr -> int -> unit
@@ -436,7 +537,7 @@ module Functions : sig
   val pushvfstring : State.t ptr -> string -> unit ptr -> string
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_rawequal} [lua_rawequal]} *)
-  val rawequal : State.t ptr -> int -> int -> int
+  val rawequal : State.t ptr -> int -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_rawget} [lua_rawget]} *)
   val rawget : State.t ptr -> int -> unit
@@ -466,7 +567,7 @@ module Functions : sig
   val replace : State.t ptr -> int -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_resume} [lua_resume]} *)
-  val resume : State.t ptr -> State.t ptr -> int -> int
+  val resume : State.t ptr -> State.t ptr -> int -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_setallocf} [lua_setallocf]} *)
   val setallocf : State.t ptr -> Alloc.t -> State.t -> unit
@@ -493,7 +594,7 @@ module Functions : sig
   val status : State.t ptr -> int
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_toboolean} [lua_toboolean]} *)
-  val toboolean : State.t ptr -> int -> int
+  val toboolean : State.t ptr -> int -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_tocfunction} [lua_tocfunction]} *)
   val tocfunction : State.t ptr -> int -> CFunction.t
@@ -532,7 +633,7 @@ module Functions : sig
   val touserdata : State.t ptr -> int -> State.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_type} [lua_type]} *)
-  val type_ : State.t ptr -> int -> int
+  val type_ : State.t ptr -> int -> Ltype.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_typename} [lua_typename]} *)
   val typename : State.t ptr -> int -> string
@@ -547,22 +648,24 @@ module Functions : sig
   val xmem : State.t ptr -> State.t ptr -> int -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_yield} [lua_yield]} *)
-  val yield : State.t ptr -> int -> int
+  val yield : State.t ptr -> int -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_yieldk} [lua_yieldk]} *)
-  val yieldk : State.t ptr -> int -> int -> CFunction.t -> int
+  val yieldk : State.t ptr -> int -> int -> CFunction.t -> Code.t
+
+  (** {2 Debug} *)
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_gethook} [lua_gethook]} *)
   val gethook : State.t ptr -> Hook.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_gethookmask} [lua_gethookmask]} *)
-  val gethookmask : State.t ptr -> int
+  val gethookmask : State.t ptr -> Mask.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_gethookcount} [lua_gethookcount]} *)
   val gethookcount : State.t ptr -> int
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_getinfo} [lua_getinfo]} *)
-  val getinfo : State.t ptr -> string -> Debug.t ptr -> int
+  val getinfo : State.t ptr -> string -> Debug.t ptr -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_getlocal} [lua_getlocal]} *)
   val getlocal : State.t ptr -> Debug.t ptr -> int -> string
@@ -574,7 +677,7 @@ module Functions : sig
   val getupvalue : State.t ptr -> int -> int -> string
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_sethook} [lua_sethook]} *)
-  val sethook : State.t ptr -> Hook.t -> int -> int -> unit
+  val sethook : State.t ptr -> Hook.t -> int -> int -> int
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_setlocal} [lua_setlocal]} *)
   val setlocal : State.t ptr -> Debug.t ptr -> int -> string
@@ -587,6 +690,8 @@ module Functions : sig
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_upvaluejoin} [lua_upvaluejoin]} *)
   val upvaluejoin : State.t ptr -> int -> int -> int -> int -> unit
+
+  (** {2 Auxiliary Functions} *)
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_addchar} [luaL_addchar]} *)
   val addchar : Buffer.t ptr -> char -> unit
@@ -616,7 +721,7 @@ module Functions : sig
   val buffinitsize : State.t ptr -> Buffer.t ptr -> Unsigned.size_t -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_callmeta} [luaL_callmeta]} *)
-  val callmeta : State.t ptr -> int -> string -> int
+  val callmeta : State.t ptr -> int -> string -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_checkany} [luaL_checkany]} *)
   val checkany : State.t ptr -> int -> unit
@@ -646,7 +751,7 @@ module Functions : sig
   val checkstring : State.t ptr -> int -> string
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_checktype} [luaL_checktype]} *)
-  val checktype : State.t ptr -> int -> int -> unit
+  val checktype : State.t ptr -> int -> Ltype.t -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_checkudata} [luaL_checkudata]} *)
   val checkudata : State.t ptr -> int -> string -> unit ptr
@@ -658,12 +763,14 @@ module Functions : sig
   val checkversion : State.t ptr -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_dofile} [luaL_dofile]} *)
-  val dofile : State.t ptr -> string -> int
+  val dofile : State.t ptr -> string -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_dostring} [luaL_dostring]} *)
-  val dostring : State.t ptr -> string -> int
+  val dostring : State.t ptr -> string -> bool
 
-  (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_error} [luaL_error]} *)
+  (** Wrapper for {{:https://www.lua.org/manual/5.2/manual.html#luaL_error} [luaL_error]}.
+
+      [ptr lua_State -> string -> string list -> int -> int] *)
   val error' : State.t ptr -> string -> string ptr -> int -> int
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_execresult} [luaL_execresult]} *)
@@ -673,13 +780,13 @@ module Functions : sig
   val fileresult : State.t ptr -> int -> string -> int
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_getmetafield} [luaL_getmetafield]} *)
-  val getmetafield : State.t ptr -> int -> string -> int
+  val getmetafield : State.t ptr -> int -> string -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_getmetatable} [luaL_getmetatable]} *)
   val getmetatable' : State.t ptr -> string -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_getsubtable} [luaL_getsubtable]} *)
-  val getsubtable : State.t ptr -> int -> string -> int
+  val getsubtable : State.t ptr -> int -> string -> bool
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_gsub} [luaL_gsub]} *)
   val gsub : State.t ptr -> string -> string -> string -> string
@@ -688,28 +795,33 @@ module Functions : sig
   val len' : State.t ptr -> int -> Unsigned.size_t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_loadbufferx} [luaL_loadbufferx]} *)
-  val loadbufferx : State.t ptr -> string -> Unsigned.size_t -> string -> string -> int
+  val loadbufferx : State.t ptr -> string -> Unsigned.size_t -> string -> string -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_loadbuffer} [luaL_loadbuffer]} *)
   val loadbuffer : State.t ptr -> string -> Unsigned.size_t -> string -> int
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_loadfile} [luaL_loadfile]} *)
-  val loadfile : State.t ptr -> string -> int
+  val loadfile : State.t ptr -> string -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_loadfilex} [luaL_loadfilex]} *)
-  val loadfilex : State.t ptr -> string -> string -> int
+  val loadfilex : State.t ptr -> string -> string -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_loadstring} [luaL_loadstring]} *)
-  val loadstring : State.t ptr -> string -> int
+  val loadstring : State.t ptr -> string -> Code.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_newlib} [luaL_newlib]} *)
   val newlib : State.t ptr -> Reg.t ptr -> unit
 
-  (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_newlibtable} [luaL_newlibtable]} *)
+  (** Wrapper for  {{:https://www.lua.org/manual/5.2/manual.html#luaL_newlibtable} [luaL_newlibtable]}.
+
+      [ptr lua_State -> ptr luaL_Reg -> int -> unit] *)
   val newlibtable : State.t ptr -> Reg.t ptr -> int -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_newmetatable} [luaL_newmetatable]} *)
-  val newmetatable : State.t ptr -> string -> int
+  val newmetatable : State.t ptr -> string -> bool
+
+  (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_newstate} [luaL_newstate]} *)
+  val newstate' : unit -> State.t ptr
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_openlibs} [luaL_openlibs]} *)
   val open_libs : State.t ptr -> unit
@@ -748,7 +860,7 @@ module Functions : sig
   val pushresultsize : Buffer.t ptr -> Unsigned.size_t -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_ref} [luaL_ref]} *)
-  val ref : State.t ptr -> int -> int
+  val ref : State.t ptr -> int -> Ref.t
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_requiref} [luaL_requiref]} *)
   val requiref : State.t ptr -> string -> CFunction.t -> int -> unit
@@ -772,7 +884,7 @@ module Functions : sig
   val typename' : State.t ptr -> int -> string
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_unref} [luaL_unref]} *)
-  val unref : State.t ptr -> int -> int -> unit
+  val unref : State.t ptr -> int -> Ref.t -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#luaL_where} [luaL_where]} *)
   val where : State.t ptr -> int -> unit

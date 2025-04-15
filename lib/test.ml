@@ -46,7 +46,7 @@ let test_setpanic () =
     ignore @@ pushstring state' "Panic!";
     1
   in
-  checkany state @@ dostring state {|error("test panic")|}
+  check bool "panic" false @@ dostring state {|error("test panic")|}
 ;;
 
 let test_buffer () =
@@ -122,16 +122,12 @@ let () =
     "Lua5.2 API Test Suite"
     [ "State Management", [ test_case "Test State" `Quick test_state_management ]
     ; ( "Globals"
-      , [ (*  (test_case "version" `Quick*)
-          (*   @@ fun () -> check string "Lua version" "Lua 5.2" Lib._VERSION)*)
-          (*;*)
-          (test_case "Hello" `Quick
+      , [ (test_case "version" `Quick
+           @@ fun () -> check string "Lua version" "Lua 5.2" Lua._VERSION)
+        ; (test_case "Hello" `Quick
            @@ fun () ->
-           ignore
-           @@ Lua.run
-           @@ fun state ->
-           let i = dostring state {|print(_VERSION)|} in
-           assert (i = 0))
+           Lua.run
+           @@ fun state -> check bool "OK" true @@ dostring state {|print(_VERSION)|})
         ; test_case "Test Globals" `Quick test_globals
         ] )
     ; "Stack Operations", [ test_case "Test Stack" `Quick test_stack_operations ]

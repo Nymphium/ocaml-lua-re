@@ -20,3 +20,5 @@ depends: [
   "odoc" { with-doc }
   "sherlodoc" { with-doc }
 ]
+
+build: ["dune" "build" "-j" jobs "-p" name]

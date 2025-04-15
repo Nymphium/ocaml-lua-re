@@ -27,6 +27,7 @@ jobs:
           nix fmt $(git ls-files '*.nix')
           dune fmt
           git diff --exit-code
+          actionlint
       - name: Run tests
         run: |
           dune test

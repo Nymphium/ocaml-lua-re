@@ -31,3 +31,37 @@ jobs:
       - name: Run tests
         run: |
           dune test
+
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/flake-checker-action@main
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            cores = 0
+      - uses: cachix/cachix-action@v16
+        with:
+          name: ocaml-lua-re-cache
+          authToken: '${{ secrets.CACHIX_TOKEN }}'
+      - name: "Switch nix-shell to .#ci"
+        uses: rrbutani/use-nix-shell-action@v1
+        with:
+          devShell: .#ci
+      - name: "Build docs"
+        run: |
+          dune build @doc ./lib
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_build/default/_doc/_html'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

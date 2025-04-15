@@ -1,7 +1,5 @@
 name: CI on Nix
-
-on:
-  [pull_request, push]
+on: [pull_request, push]
 
 jobs:
   test:
@@ -30,9 +28,10 @@ jobs:
           actionlint
       - name: Run tests
         run: |
-          dune test
+          dune test --debug-backtraces
 
   deploy:
+    needs: test
     if: github.ref == 'refs/heads/master'
     environment:
       name: github-pages

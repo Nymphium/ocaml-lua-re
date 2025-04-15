@@ -11,7 +11,7 @@ $ dune build
 ```
 
 # Documentation
-https://nymphium.github.io/ocaml-lua-re/
+https://nymphium.github.io/ocaml-lua-re/lua-re
 
 # LICENSE
 MIT

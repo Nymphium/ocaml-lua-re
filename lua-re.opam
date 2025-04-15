@@ -16,4 +16,5 @@ depends: [
 
   "alcotest" { with-test }
   "odoc" { with-doc }
+  "sherlodoc" { with-doc }
 ]

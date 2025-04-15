@@ -116,13 +116,13 @@
             packages = [
               formatter
               scope.ocamlformat
+              pkgs.actionlint
             ];
           };
           default = pkgs.mkShell {
             inputsFrom = [ ci ];
             buildInputs = devPackages ++ [
               pkgs.nil
-              pkgs.actionlint
             ];
           };
         };

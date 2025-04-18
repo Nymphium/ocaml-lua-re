@@ -10,3 +10,6 @@
  (name test)
  (modules test)
  (libraries lua ctypes alcotest))
+
+(documentation)
+(mdx)

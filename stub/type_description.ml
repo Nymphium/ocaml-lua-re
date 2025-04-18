@@ -7,11 +7,11 @@ module Types (S : Ctypes.TYPE) = struct
   type 'a static_funptr = 'a S.static_funptr
 
   open struct
-    let ( @:! ) name t = constant name t
-    let ( .@:[]<- ) t name typ = field t name typ
+    let[@inline] ( @:! ) name t = constant name t
+    let[@inline] ( .@:[]<- ) t name typ = field t name typ
 
     (** just flip original *)
-    let typedef' name t = typedef t name
+    let[@inline] typedef' name t = typedef t name
   end
 
   let version_num = "LUA_VERSION_NUM" @:! int
@@ -90,7 +90,8 @@ module Types (S : Ctypes.TYPE) = struct
   module Alloc = struct
     (* NOT abstract type *)
     type t =
-      (unit ptr -> unit ptr -> Ltype.t -> Unsigned.size_t -> unit ptr) static_funptr
+      (unit ptr -> unit ptr -> Unsigned.size_t -> Unsigned.size_t -> unit ptr)
+        static_funptr
 
     let t : t typ =
       typedef' "lua_Alloc"

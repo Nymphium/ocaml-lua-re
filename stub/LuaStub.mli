@@ -260,7 +260,7 @@ module Types : sig
     (** @see <https://www.lua.org/source/5.2/lua.h.html#LUA_HOOKTAILCALL> *)
     val tailcall : _t
 
-    type t = (unit ptr ptr -> Debug.t ptr -> unit) static_funptr
+    type t = (State.t ptr -> Debug.t ptr -> unit) static_funptr
 
     val t : t typ
   end
@@ -521,7 +521,7 @@ module Functions : sig
   val pushlstring : State.t ptr -> string -> Unsigned.size_t -> string
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_pushnil} [lua_pushnil]} *)
-  val pushniil : State.t ptr -> unit
+  val pushnil : State.t ptr -> unit
 
   (** {{:https://www.lua.org/manual/5.2/manual.html#lua_pushnumber} [lua_pushnumber]} *)
   val pushnumber : State.t ptr -> float -> unit

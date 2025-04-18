@@ -2,10 +2,11 @@ open Ctypes
 
 module Functions (F : Ctypes.FOREIGN) = struct
   open F
-  module T = Types_generated
 
   open struct
-    let ( @:: ) name t = F.foreign name t
+    module T = Types_generated
+
+    let[@inline] ( @:: ) name t = F.foreign name t
   end
 
   module Const = struct
@@ -141,7 +142,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
     "lua_pushlstring" @:: ptr T.State.t @-> string @-> size_t @-> returning @@ string
   ;;
 
-  let pushniil = "lua_pushnil" @:: ptr T.State.t @-> returning void
+  let pushnil = "lua_pushnil" @:: ptr T.State.t @-> returning void
   let pushnumber = "lua_pushnumber" @:: ptr T.State.t @-> T.number @-> returning void
   let pushstring = "lua_pushstring" @:: ptr T.State.t @-> string @-> returning @@ string
   let pushthread = "lua_pushthread" @:: ptr T.State.t @-> returning int

@@ -6,23 +6,22 @@ open struct
   module T = LuaStub.Types
 end
 
-(** {1 Constants} *)
-
-module Const = Const
-module Ltype = T.Ltype
-module Code = T.Code
-module Ref = T.Ref
-module Op = T.Op
-module Gc = T.Gc
-module Hook = T.Hook
-module Mask = T.Mask
-
-(** {1 Utilities} *)
-
 include Wrapper
 
-(** {1 Types-specific} *)
+(** {1 Types, functions and constants wrapper} *)
 
-(** {2 {!LuaStub.Types.Buffer} utilities} *)
-
+module CFunction = CFunction
+module Alloc = Alloc
+module Reader = Reader
+module Writer = Writer
+module State = State
+module Debug = Debug
+module Const = Const
+module Ltype = Ltype
+module Code = Code
+module Ref = Ref
+module Op = Op
+module Gc = Gc
+module Hook = Hook
+module Mask = Mask
 module Buffer = Buffer

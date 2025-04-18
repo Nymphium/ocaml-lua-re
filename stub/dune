@@ -34,7 +34,3 @@
  (name discover)
  (modules discover)
  (libraries dune-configurator))
-
-(mdx
- (files :standard - *.mli)
- (libraries lua-re.stub))

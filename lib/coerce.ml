@@ -1,28 +1,14 @@
+(** {1 Coerce functions} *)
+
 open LuaStub
+open Ctypes
 
 open struct
   module T = Types
 end
 
-let cfunction f =
-  Ctypes.coerce
-    (Foreign.funptr @@ Ctypes.(ptr T.State.t @-> returning int))
-    T.CFunction.t
-    f
-;;
+let hook = coerce (Foreign.funptr @@ ptr T.State.t @-> returning int) T.Hook.t
 
-let alloc f =
-  Ctypes.coerce (Foreign.funptr @@ Ctypes.(ptr T.State.t @-> returning int)) T.Alloc.t f
-;;
-
-let reader f =
-  Ctypes.coerce (Foreign.funptr @@ Ctypes.(ptr T.State.t @-> returning int)) T.Reader.t f
-;;
-
-let writer f =
-  Ctypes.coerce (Foreign.funptr @@ Ctypes.(ptr T.State.t @-> returning int)) T.Writer.t f
-;;
-
-let hook f =
-  Ctypes.coerce (Foreign.funptr @@ Ctypes.(ptr T.State.t @-> returning int)) T.Hook.t f
+let bwd_cfunction f =
+  coerce T.CFunction.t (Foreign.funptr @@ ptr T.State.t @-> returning int) f
 ;;

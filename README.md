@@ -1,7 +1,8 @@
-lua-re: OCaml bindings for Lua 🌕️
+🌕️lua-re: OCaml bindings for Lua
 ===
 
-OCaml bindings for Lua 5.2 through ctypes
+OCaml bindings for Lua through ctypes.
+Currently supports Lua 5.2 only.
 
 # Installation
 <!-- $MDX skip -->

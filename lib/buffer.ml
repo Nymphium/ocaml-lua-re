@@ -5,8 +5,12 @@ open struct
   module C = Ctypes
 end
 
+module Base = T.Buffer
+
+type t = Base.t C.ptr
+
 (** Creates a {{!LuaStub.Types.Buffer.type-t} [lua_Buffer]}. *)
-let create ?size state =
+let create ?size (state : State.t) : t =
   let b = Util.s_ptr T.Buffer.t in
   let () =
     match size with
@@ -17,7 +21,7 @@ let create ?size state =
 ;;
 
 (** Finalises a buffer [b] and returns the value as an OCaml string *)
-let tostring state b =
+let tostring (state : State.t) (b : t) =
   F.pushresult b;
   F.tostring state (-1)
 ;;

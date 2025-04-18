@@ -40,7 +40,7 @@ let test_setpanic () =
   Lua.run
   @@ fun state ->
   let _ =
-    Lua.setpanic state
+    Lua.set_panic_handler state
     @@ fun state' ->
     print_endline "Panic!";
     ignore @@ pushstring state' "Panic!";

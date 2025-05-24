@@ -35,8 +35,8 @@ let run f =
   Fun.protect
     ~finally:(fun () -> F.close state)
     (fun () ->
-      let ret = f state in
-      ret)
+       let ret = f state in
+       ret)
 ;;
 
 (** Gets the global variable [name] from the [state] and check the type with [checker].

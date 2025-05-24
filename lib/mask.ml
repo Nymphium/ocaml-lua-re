@@ -24,4 +24,3 @@ let bwd : t -> Bwd.t = function
   | `Line -> Bwd.line
   | `Count -> Bwd.count
 ;;
-

@@ -71,22 +71,12 @@
             overlay =
               final: prev:
               {
-                utop = prev.utop.overrideAttrs (previousAttrs: {
-                  # Fix for "unpacker produced multiple directories"
-                  # See: https://stackoverflow.com/a/77161896
-                  sourceRoot = ".";
-                });
                 conf-lua = prev.conf-lua.overrideAttrs (oa: {
                   buildInputs = oa.buildInputs ++ [
                     pkgs.lua
                   ];
                   buildPhase = ''
                     ${pkgs.pkg-config}/bin/pkg-config lua
-                  '';
-                });
-                conf-libffi = prev.conf-libffi.overrideAttrs (oa: {
-                  buildPhase = ''
-                    ${pkgs.pkg-config}/bin/pkg-config libffi
                   '';
                 });
               }
